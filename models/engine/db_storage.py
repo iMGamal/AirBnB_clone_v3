@@ -81,7 +81,7 @@ class DBStorage:
         if cls:
             return self.__session.query(cls).count()
         else:
-            return sum(map(lambda c: self.__session.query(c).count(), classes.values()))
+            return sum(map(self.__session.query(c).count(), classes.values()))
 
     def get(self, cls, id: str):
         """Gets objects using given parameters."""
