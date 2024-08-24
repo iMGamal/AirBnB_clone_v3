@@ -2,6 +2,7 @@
 """
 Contains the class DBStorage
 """
+import urllib.parse
 
 import models
 from models.amenity import Amenity
@@ -15,7 +16,6 @@ from os import getenv
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-import urllib.parse
 
 classes = {"Amenity": Amenity, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
@@ -40,6 +40,24 @@ class DBStorage:
                                              HBNB_MYSQL_DB))
         if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
+
+    def get(self, cls, id: str):
+        """
+        Get Object By Id
+        :param cls:
+        :param id:
+        :return:
+        """
+        if not cls or not cls:
+            return None
+        return self.__session.query(cls).filter_by(id=id).first()
+
+    def count(self, cls=None):
+        """count the number of objects in storage"""
+        if cls:
+            return self.__session.query(cls).count()
+        return sum(map(lambda c: self.__session.query(c).count(),
+                       classes.values()))
 
     def all(self, cls=None):
         """query on the current database session"""
@@ -75,17 +93,3 @@ class DBStorage:
     def close(self):
         """call remove() method on the private session attribute"""
         self.__session.remove()
-
-    def count(self, cls=None):
-        "Counts number of objects in storage."""
-        if cls:
-            return self.__session.query(cls).count()
-        else:
-            return sum(map(self.__session.query(c).count(), classes.values()))
-
-    def get(self, cls, id: str):
-        """Gets objects using given parameters."""
-        if not cls:
-            return None
-        else:
-            return self.__session.query(cls).filter_by(id=id).first()

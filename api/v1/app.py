@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Access point to REST API."""
+"""this module is the entry point to the REST API"""
 from flask import Flask, jsonify
 from flask_cors import CORS
 from models import storage
@@ -12,18 +12,18 @@ app.url_map.strict_slashes = False
 app.register_blueprint(app_views)
 
 
+@app.teardown_appcontext
+def teardown_db(exception):
+    """closes the storage on teardown"""
+    storage.close()
+
+
 @app.errorhandler(404)
 def page_not_found(error):
-    """Deals with 404."""
+    """handles 404 error by returning a JSON error response"""
     error_dict = {"error": "Not found"}
     status_code = 404
     return jsonify(error_dict), status_code
-
-
-@app.teardown_appcontext
-def teardown_db(exception):
-    """Terminates storage upon teardown"""
-    storage.close()
 
 
 if __name__ == '__main__':
